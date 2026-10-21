@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import Sidebar from './components/Sidebar';
 import DashboardPage from './pages/DashboardPage';
+import CustomersPage from './pages/CustomersPage';
 import SendMoneyPage from './pages/SendMoneyPage';
 import SavingsPage from './pages/SavingsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -68,6 +69,14 @@ function DashboardLayout() {
             style={({ isActive }) => (isActive ? { background: 'var(--color-brand-light)', color: 'var(--color-brand-dark)' } : { color: 'var(--color-text-secondary)' })}
           >
             📊 Dashboard
+          </NavLink>
+          <NavLink
+            to="/customers"
+            onClick={() => setMobileMenuOpen(false)}
+            className="px-3 py-2 rounded-lg text-sm font-medium"
+            style={({ isActive }) => (isActive ? { background: 'var(--color-brand-light)', color: 'var(--color-brand-dark)' } : { color: 'var(--color-text-secondary)' })}
+          >
+            👥 Customers
           </NavLink>
           <NavLink
             to="/send"
@@ -252,6 +261,7 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route element={<DashboardLayout />}>
                     <Route path="/" element={<DashboardPage />} />
+                    <Route path="/customers" element={<CustomersPage />} />
                     <Route path="/send" element={<SendMoneyPage />} />
                     <Route path="/savings" element={<SavingsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />

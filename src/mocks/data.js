@@ -61,6 +61,34 @@ export function generateTransactions(count = 15) {
   });
 }
 
+export function generateCustomers(count = 8) {
+  return Array.from({ length: count }, (_, i) => {
+    const name = NIGERIAN_NAMES[i % NIGERIAN_NAMES.length];
+    const [firstName, lastName] = name.split(' ');
+    const daysAgo = Math.floor(Math.random() * 365);
+    const createdAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
+
+    return {
+      id: 90000000 + i + 1,
+      customerCode: `CUS_${Math.random().toString(36).slice(2, 12)}`,
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
+      firstName,
+      lastName,
+      phone: `+23480${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
+      metadata: {},
+      riskAction: 'default',
+      domain: 'test',
+      identified: false,
+      createdAt,
+      updatedAt: createdAt,
+      displayName: name,
+      authorizations: [],
+      subscriptions: [],
+      transactions: [],
+    };
+  });
+}
+
 export const SAVINGS_PLANS = [
   { id: 'sav-001', type: 'fixed', name: 'Fixed Deposit', target: 500000000, current: 235000000, apy: 15.2, locked: true },
   { id: 'sav-002', type: 'flexible', name: 'Flexible Savings', target: 100000000, current: 45000000, apy: 8.5, locked: false },

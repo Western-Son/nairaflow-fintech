@@ -3,7 +3,7 @@
  * These intercept fetch() at the network level.
  */
 import { http, HttpResponse, delay } from 'msw';
-import { generateTransactions, SAVINGS_PLANS, EXCHANGE_RATES } from './data';
+import { generateTransactions, generateCustomers, SAVINGS_PLANS, EXCHANGE_RATES } from './data';
 
 // Bank code to name mapping (matches the grouped list in SendMoneyForm.jsx)
 const BANK_NAMES = {
@@ -38,6 +38,9 @@ function getBankName(code) {
 // Generate a stable set of transactions (refreshed per session)
 let cachedTransactions = generateTransactions(15);
 
+// Generate a stable set of customers (refreshed per session)
+let cachedCustomers = generateCustomers(8);
+
 // Track dynamic balance (in kobo - starts at 2,450,000 NGN = 245,000,000 kobo)
 let currentBalance = 245000000;
 
@@ -58,6 +61,83 @@ export const handlers = [
     await delay(800);
     if (Math.random() < 0.08) return new HttpResponse(null, { status: 500 });
     return HttpResponse.json({ transactions: cachedTransactions });
+  }),
+
+  // ─── GET /api/customers ───
+  http.get('/api/customers', async () => {
+    await delay(700);
+    if (Math.random() < 0.05) return new HttpResponse(null, { status: 500 });
+    return HttpResponse.json({ customers: cachedCustomers });
+  }),
+
+  // ─── GET /api/customers/:code ───
+  http.get('/api/customers/:code', async ({ params }) => {
+    await delay(500);
+    const customer = cachedCustomers.find(
+      c => c.customerCode === params.code || String(c.id) === String(params.code) || c.email === params.code
+    );
+    if (!customer) {
+      return HttpResponse.json({ message: 'Customer not found' }, { status: 404 });
+    }
+    return HttpResponse.json({ customer });
+  }),
+
+  // ─── POST /api/customers ───
+  http.post('/api/customers', async ({ request }) => {
+    await delay(900);
+    const body = await request.json();
+
+    if (!body.email) {
+      return HttpResponse.json({ message: 'Email is required' }, { status: 400 });
+    }
+    if (cachedCustomers.some(c => c.email === body.email)) {
+      return HttpResponse.json({ message: 'Customer with this email already exists' }, { status: 400 });
+    }
+
+    const newCustomer = {
+      id: 90000000 + cachedCustomers.length + 1,
+      customerCode: `CUS_${Math.random().toString(36).slice(2, 12)}`,
+      email: body.email,
+      firstName: body.firstName || null,
+      lastName: body.lastName || null,
+      phone: body.phone || null,
+      metadata: body.metadata || {},
+      riskAction: 'default',
+      domain: 'test',
+      identified: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      displayName: [body.firstName, body.lastName].filter(Boolean).join(' ') || body.email,
+      authorizations: [],
+      subscriptions: [],
+      transactions: [],
+    };
+    cachedCustomers = [newCustomer, ...cachedCustomers];
+    return HttpResponse.json({ customer: newCustomer }, { status: 201 });
+  }),
+
+  // ─── PUT /api/customers/:code ───
+  http.put('/api/customers/:code', async ({ params, request }) => {
+    await delay(800);
+    const body = await request.json();
+    const index = cachedCustomers.findIndex(
+      c => c.customerCode === params.code || String(c.id) === String(params.code)
+    );
+    if (index === -1) {
+      return HttpResponse.json({ message: 'Customer not found' }, { status: 404 });
+    }
+
+    cachedCustomers[index] = {
+      ...cachedCustomers[index],
+      ...Object.fromEntries(Object.entries(body).filter(([, v]) => v !== undefined && v !== '')),
+      updatedAt: new Date().toISOString(),
+    };
+    if (cachedCustomers[index].firstName || cachedCustomers[index].lastName) {
+      cachedCustomers[index].displayName =
+        [cachedCustomers[index].firstName, cachedCustomers[index].lastName].filter(Boolean).join(' ') ||
+        cachedCustomers[index].email;
+    }
+    return HttpResponse.json({ customer: cachedCustomers[index] });
   }),
 
   // ─── POST /api/transfers ───
