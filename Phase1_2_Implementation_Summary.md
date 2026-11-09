@@ -56,7 +56,7 @@ VITE_USE_MOCK=false
   - Handles status mapping (Paystack → App)
   - Extracts descriptions, bank, account info
   - Provides filtering and sorting utilities
-  - Calculates statistics and totals
+  - Calculates statistics and totasl
   - Pagination metadata extraction
 
 #### 2. **Repository Pattern Implementation**

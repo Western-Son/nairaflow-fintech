@@ -5,7 +5,7 @@
 
 export const paystackConfig = {
   environment: import.meta.env.VITE_API_ENVIRONMENT || 'test',
-  baseURL: import.meta.env.VITE_PAYSTACK_BASE_URL || 'https://api.paystack.co',
+  baseURL: import.meta.env.VITE_PAYSTACK_BASE_URL,
   secretKey: import.meta.env.VITE_PAYSTACK_SECRET_KEY,
   publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   useMock: import.meta.env.VITE_USE_MOCK === 'true',
